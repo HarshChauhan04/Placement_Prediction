@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Placement & Salary Assessment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+        <!-- Page Header -->
+        <div class="mb-4">
+            <span class="section-eyebrow">CAREER ASSESSMENT</span>
+            <h2 class="fw-bold text-dark mb-1">Evaluate Your Placement Readiness</h2>
+            <p class="text-muted small">
+                Input your current academic performance, technical scores, and internship experience to generate real-time predictive likelihoods and expected salary packages.
+            </p>
+        </div>
+
+        <div class="card-novara mb-5">
+            <div class="card-novara-header-dark">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="brand-icon-box">
+                        <i class="bi bi-cpu-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">Student Profile ML Assessment</h4>
+                        <span class="text-white-50 small">Dual Random Forest & Linear Regression Engine</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-novara-body">
+                <form method="POST" action="{{ url_for('predict.predict_page') }}" id="predictForm">
+                    <!-- CSRF Protection Token -->
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- Section 1: Academic Scores -->
+                    <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+                        <span class="badge rounded-pill bg-primary px-3 py-1">01</span>
+                        <h5 class="fw-bold text-dark mb-0">Academic Performance</h5>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-4">
+                            <label for="cgpa" class="form-label">College CGPA <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="5.0" max="10.0" class="form-control" id="cgpa" name="cgpa"
+                                   placeholder="e.g. 8.25" value="{{ form_data.get('cgpa', '') }}" required>
+                            <div class="form-text small text-muted">Scale: 5.00 to 10.00</div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="10th_percent" class="form-label">10th Board (%) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="40.0" max="100.0" class="form-control" id="10th_percent" name="10th_percent"
+                                   placeholder="e.g. 85.0" value="{{ form_data.get('10th_percent', '') }}" required>
+                            <div class="form-text small text-muted">Range: 40.0% to 100.0%</div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="12th_percent" class="form-label">12th Board (%) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="40.0" max="100.0" class="form-control" id="12th_percent" name="12th_percent"
+                                   placeholder="e.g. 78.5" value="{{ form_data.get('12th_percent', '') }}" required>
+                            <div class="form-text small text-muted">Range: 40.0% to 100.0%</div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Technical & Practical Skills -->
+                    <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+                        <span class="badge rounded-pill bg-primary px-3 py-1">02</span>
+                        <h5 class="fw-bold text-dark mb-0">Technical Skills & Stream</h5>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-4">
+                            <label for="coding_score" class="form-label">Coding Assessment Score <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="0.0" max="100.0" class="form-control" id="coding_score" name="coding_score"
+                                   placeholder="Score out of 100" value="{{ form_data.get('coding_score', '') }}" required>
+                            <div class="form-text small text-muted">Technical exam score (0 - 100)</div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="communication_score" class="form-label">Communication Score <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="0.0" max="100.0" class="form-control" id="communication_score" name="communication_score"
+                                   placeholder="Score out of 100" value="{{ form_data.get('communication_score', '') }}" required>
+                            <div class="form-text small text-muted">Verbal test score (0 - 100)</div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="branch" class="form-label">Engineering Discipline <span class="text-danger">*</span></label>
+                            <select class="form-select" id="branch" name="branch" required>
+                                <option value="" disabled {% if not form_data.get('branch') %}selected{% endif %}>Select Discipline</option>
+                                <option value="Computer Science" {% if form_data.get('branch') == 'Computer Science' %}selected{% endif %}>Computer Science</option>
+                                <option value="Information Technology" {% if form_data.get('branch') == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+                                <option value="Electronics" {% if form_data.get('branch') == 'Electronics' %}selected{% endif %}>Electronics</option>
+                                <option value="Mechanical" {% if form_data.get('branch') == 'Mechanical' %}selected{% endif %}>Mechanical</option>
+                                <option value="Civil" {% if form_data.get('branch') == 'Civil' %}selected{% endif %}>Civil</option>
+                            </select>
+                            <div class="form-text small text-muted">Select active major</div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Portfolio & Backlogs -->
+                    <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+                        <span class="badge rounded-pill bg-primary px-3 py-1">03</span>
+                        <h5 class="fw-bold text-dark mb-0">Practical Experience & Academic Standing</h5>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-3">
+                            <label for="internships" class="form-label">Internships <span class="text-danger">*</span></label>
+                            <input type="number" min="0" max="10" class="form-control" id="internships" name="internships"
+                                   placeholder="e.g. 1" value="{{ form_data.get('internships', '0') }}" required>
+                            <div class="form-text small text-muted">Completed count</div>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label for="projects" class="form-label">Major Projects <span class="text-danger">*</span></label>
+                            <input type="number" min="0" max="15" class="form-control" id="projects" name="projects"
+                                   placeholder="e.g. 2" value="{{ form_data.get('projects', '1') }}" required>
+                            <div class="form-text small text-muted">Built applications</div>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label for="certifications" class="form-label">Certifications <span class="text-danger">*</span></label>
+                            <input type="number" min="0" max="15" class="form-control" id="certifications" name="certifications"
+                                   placeholder="e.g. 1" value="{{ form_data.get('certifications', '0') }}" required>
+                            <div class="form-text small text-muted">Credentials earned</div>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label for="backlogs" class="form-label">Active Backlogs <span class="text-danger">*</span></label>
+                            <input type="number" min="0" max="10" class="form-control" id="backlogs" name="backlogs"
+                                   placeholder="e.g. 0" value="{{ form_data.get('backlogs', '0') }}" required>
+                            <div class="form-text small text-muted">Current arrears count</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button with Loading State -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top">
+                        <span class="small text-muted">
+                            <i class="bi bi-shield-lock text-primary me-1"></i>
+                            Predictions securely logged to your MongoDB profile.
+                        </span>
+                        <button type="submit" class="btn-pill-primary py-3 px-4 shadow" id="submitBtn">
+                            <span id="btnIcon"><i class="bi bi-lightning-charge-fill"></i></span>
+                            <span id="btnText">Execute Placement Prediction</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById("predictForm").addEventListener("submit", function () {
+        const btn = document.getElementById("submitBtn");
+        const btnIcon = document.getElementById("btnIcon");
+        const btnText = document.getElementById("btnText");
+
+        btn.classList.add("disabled");
+        btnIcon.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>';
+        btnText.innerText = 'Evaluating ML Pipeline...';
+    });
+</script>
+{% endblock %}

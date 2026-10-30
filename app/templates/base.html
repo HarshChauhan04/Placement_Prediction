@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PlacementAI{% endblock %} | Career & Salary Intelligence</title>
+
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Application Stylesheet (Novara Blue Theme) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- Novara Frosted Dark Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-novara sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <div class="brand-logo-container">
+                    <div class="brand-icon-box">
+                        <i class="bi bi-mortarboard-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h1 class="brand-title">PlacementAI</h1>
+                        <span class="brand-subtitle">CAREER ADVISORY & ML</span>
+                    </div>
+                </div>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link nav-novara-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-novara-link" href="{{ url_for('predict.predict_page') }}">Assessment</a>
+                    </li>
+                    {% if session.get('user_id') %}
+                        {% if session.get('user_role') == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link nav-novara-link" href="{{ url_for('admin.admin_dashboard') }}">
+                                    <i class="bi bi-speedometer2 me-1"></i> Admin Analytics
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link nav-novara-link" href="{{ url_for('student_dashboard') }}">
+                                    <i class="bi bi-grid-fill me-1"></i> Dashboard
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-2">
+                    {% if session.get('user_id') %}
+                        <li class="nav-item">
+                            <span class="user-pill">
+                                <i class="bi bi-person-circle"></i>
+                                <span>{{ session.get('user_name', 'Student') }}</span>
+                                <span class="badge bg-primary ms-1 text-uppercase" style="font-size: 0.65rem;">{{ session.get('user_role', 'student') }}</span>
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn-pill-secondary py-1 px-3" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link nav-novara-link" href="{{ url_for('auth.login') }}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn-pill-primary py-2 px-3" href="{{ url_for('auth.register') }}">
+                                <span>Get Started</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Optional Hero Block -->
+    {% block hero %}{% endblock %}
+
+    <!-- Main Container for Flash Messages & Body Content -->
+    <main class="container my-4 flex-grow-1">
+        <!-- Flash Messages Block -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="row justify-content-center mb-3">
+                    <div class="col-12 col-md-10">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm rounded-4 border-0" role="alert">
+                                {% if category == 'success' %}
+                                    <i class="bi bi-check-circle-fill me-2 fs-5 text-success"></i>
+                                {% elif category == 'danger' or category == 'error' %}
+                                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-danger"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="bi bi-exclamation-circle-fill me-2 fs-5 text-warning"></i>
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill me-2 fs-5 text-primary"></i>
+                                {% endif %}
+                                <span class="fw-medium">{{ message }}</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Specific Content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Novara Dark Sleek Footer -->
+    <footer class="footer-novara">
+        <div class="container">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-md-6 text-center text-md-start">
+                    <div class="d-flex align-items-center gap-2 justify-content-center justify-content-md-start mb-1">
+                        <div class="brand-icon-box" style="width: 28px; height: 28px; font-size: 0.8rem;">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <span class="text-white fw-bold fs-6">PlacementAI</span>
+                        <span class="badge bg-secondary-subtle text-secondary small ms-2">v2.0 Novara Edition</span>
+                    </div>
+                    <p class="mb-0 small text-muted">
+                        Campus Recruitment Readiness & Salary Package Intelligence &copy; 2026.
+                    </p>
+                </div>
+                <div class="col-12 col-md-6 text-center text-md-end">
+                    <span class="small text-muted me-3">
+                        <i class="bi bi-shield-check text-primary me-1"></i> PyMongo + Scikit-Learn
+                    </span>
+                    <a href="{{ url_for('predict.predict_page') }}" class="btn-pill-secondary py-1 px-3 small">
+                        <span>Predict Now</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Page Specific JavaScript Hooks -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

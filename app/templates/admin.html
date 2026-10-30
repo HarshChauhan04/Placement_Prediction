@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Control Panel{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center pb-3 mb-4 border-bottom">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-shield-lock-fill text-primary me-2"></i>
+            Administrator Analytics & System Monitor
+        </h2>
+        <p class="text-muted mb-0">
+            Real-time platform usage, machine learning performance metrics, and user management.
+        </p>
+    </div>
+    <div class="mt-3 mt-md-0">
+        <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
+            <i class="bi bi-check-circle-fill me-1"></i> MongoDB: placement_db Connected
+        </span>
+    </div>
+</div>
+
+<!-- 1. KPI Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card border-primary">
+            <div class="text-muted small text-uppercase fw-semibold">Total Accounts</div>
+            <div class="kpi-value text-primary mt-1">{{ total_users }}</div>
+            <div class="small text-muted mt-1">Students & Administrators</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card border-info">
+            <div class="text-muted small text-uppercase fw-semibold">Predictions Logged</div>
+            <div class="kpi-value text-info mt-1">{{ total_predictions }}</div>
+            <div class="small text-muted mt-1">Recorded in predictions collection</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card border-success">
+            <div class="text-muted small text-uppercase fw-semibold">Placed Rate</div>
+            <div class="kpi-value text-success mt-1">{{ placed_pct }}%</div>
+            <div class="small text-muted mt-1">{{ placed_count }} / {{ total_predictions }} Candidates</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card border-warning">
+            <div class="text-muted small text-uppercase fw-semibold">At-Risk Rate</div>
+            <div class="kpi-value text-warning mt-1">{{ (100 - placed_pct)|round(1) if total_predictions > 0 else 0 }}%</div>
+            <div class="small text-muted mt-1">{{ not_placed_count }} / {{ total_predictions }} Candidates</div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Chart.js Visualizations Row -->
+<div class="row g-4 mb-4">
+    <!-- Chart 1: Predictions Per Branch -->
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-bar-chart-fill text-primary me-2"></i>
+                    Student Predictions by Engineering Branch
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                <canvas id="branchChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Placement Outcome Ratio -->
+    <div class="col-12 col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-pie-chart-fill text-success me-2"></i>
+                    Placement Outcome Distribution
+                </h6>
+            </div>
+            <div class="card-body p-3 d-flex justify-content-center align-items-center">
+                <div style="max-height: 230px; width: 100%;">
+                    <canvas id="outcomeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Machine Learning Model Performance Metrics (From outputs/metrics.json) -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-graph-up-arrow text-primary me-2"></i>
+            Trained Machine Learning Model Benchmarks
+        </h5>
+        <span class="badge bg-secondary">Loaded from outputs/metrics.json</span>
+    </div>
+    <div class="card-body p-4">
+        <!-- Classification Metrics Table -->
+        <h6 class="fw-bold text-secondary mb-2">1. Classification Models (Placement Status)</h6>
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>Accuracy</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1-Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if model_metrics and 'classification_models' in model_metrics %}
+                        {% for model_key, scores in model_metrics['classification_models'].items() %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ model_key.replace('_', ' ') }}</td>
+                                <td>{{ (scores.Accuracy * 100)|round(2) }}%</td>
+                                <td>{{ scores.Precision }}</td>
+                                <td>{{ scores.Recall }}</td>
+                                <td><span class="badge bg-success-subtle text-success fs-6">{{ scores.F1_Score }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="5" class="text-muted text-center">Metrics file not found. Run train_models.py to compute scores.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Regression Metrics Table -->
+        <h6 class="fw-bold text-secondary mb-2">2. Regression Models (Salary Package in LPA for Placed Candidates)</h6>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>R² Score (Variance Explained)</th>
+                        <th>Mean Absolute Error (MAE)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if model_metrics and 'regression_models' in model_metrics %}
+                        {% for model_key, scores in model_metrics['regression_models'].items() %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ model_key.replace('_', ' ') }}</td>
+                                <td><span class="badge bg-primary-subtle text-primary fs-6">{{ scores.R2_Score }}</span></td>
+                                <td class="fw-semibold text-danger">{{ scores.MAE_LPA }} LPA</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="3" class="text-muted text-center">Metrics file not found.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Model Diagnostic Charts (Saved from Matplotlib) -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-grid-3x3 me-2"></i>
+                    Logistic Regression Confusion Matrix
+                </h6>
+            </div>
+            <div class="card-body text-center p-3">
+                <img src="{{ url_for('admin.serve_chart_image', filename='confusion_matrix_logistic_regression.png') }}"
+                     alt="Confusion Matrix" class="img-fluid rounded border" style="max-height: 320px;">
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-scatter-chart me-2"></i>
+                    Actual vs. Predicted Salary (LPA)
+                </h6>
+            </div>
+            <div class="card-body text-center p-3">
+                <img src="{{ url_for('admin.serve_chart_image', filename='actual_vs_predicted_regression.png') }}"
+                     alt="Regression Scatter Plot" class="img-fluid rounded border" style="max-height: 320px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. Registered Users Account Roster (Security: Password Hash Hidden) -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-people-fill text-primary me-2"></i>
+            Registered User Accounts (MongoDB: users)
+        </h5>
+        <span class="badge bg-secondary">{{ users|length }} Total</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Full Name</th>
+                        <th>Email Address</th>
+                        <th>Assigned Role</th>
+                        <th>Created Date</th>
+                        <th>Account Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td class="ps-4 fw-semibold">{{ user.name }}</td>
+                            <td><code>{{ user.email }}</code></td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger"><i class="bi bi-shield-fill me-1"></i> Admin</span>
+                                {% else %}
+                                    <span class="badge bg-primary">Student</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">
+                                {{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'Initial Setup' }}
+                            </td>
+                            <td>
+                                {% if user.locked_until %}
+                                    <span class="badge bg-danger">Locked</span>
+                                {% else %}
+                                    <span class="badge bg-success">Active</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 1. Chart.js: Branch Distribution Bar Chart
+    const branchCtx = document.getElementById('branchChart').getContext('2d');
+    new Chart(branchCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ branch_labels|tojson }},
+            datasets: [{
+                label: 'Prediction Assessments',
+                data: {{ branch_data|tojson }},
+                backgroundColor: 'rgba(13, 110, 253, 0.75)',
+                borderColor: '#0d6efd',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    // 2. Chart.js: Outcome Donut Chart
+    const outcomeCtx = document.getElementById('outcomeChart').getContext('2d');
+    new Chart(outcomeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Placed Forecast', 'At-Risk Forecast'],
+            datasets: [{
+                data: [{{ placed_count }}, {{ not_placed_count }}],
+                backgroundColor: ['#198754', '#dc3545'],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

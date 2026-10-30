@@ -1,0 +1,50 @@
+{
+    "classification_models": {
+        "Logistic_Regression": {
+            "Accuracy": 0.68,
+            "Precision": 0.6993,
+            "Recall": 0.856,
+            "F1_Score": 0.7698,
+            "Confusion_Matrix": [
+                [
+                    29,
+                    46
+                ],
+                [
+                    18,
+                    107
+                ]
+            ],
+            "Chart_File": "confusion_matrix_logistic_regression.png"
+        },
+        "Random_Forest_Classifier": {
+            "Accuracy": 0.645,
+            "Precision": 0.6731,
+            "Recall": 0.84,
+            "F1_Score": 0.7473,
+            "Confusion_Matrix": [
+                [
+                    24,
+                    51
+                ],
+                [
+                    20,
+                    105
+                ]
+            ],
+            "Chart_File": "confusion_matrix_random_forest.png"
+        }
+    },
+    "regression_models": {
+        "Linear_Regression": {
+            "R2_Score": 0.9134,
+            "MAE_LPA": 0.4908,
+            "Chart_File": "actual_vs_predicted_regression.png"
+        },
+        "Random_Forest_Regressor": {
+            "R2_Score": 0.8575,
+            "MAE_LPA": 0.638,
+            "Chart_File": "actual_vs_predicted_regression.png"
+        }
+    }
+}

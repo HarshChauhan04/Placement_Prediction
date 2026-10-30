@@ -1,0 +1,5 @@
+cd "c:\Users\Vishu\Desktop\mongodb projects\project1_placement_prediction"
+pip install -r requirements.txt
+python src/main.py
+python create_admin.py
+python app/app.py

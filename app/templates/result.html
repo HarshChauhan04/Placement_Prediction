@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Result{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-9">
+
+        <!-- Main Outcome Result Card -->
+        <div class="card-novara mb-4 {{ 'result-placed-novara' if placed == 1 else 'result-not-placed-novara' }}">
+            <div class="card-novara-body p-4 p-md-5 text-center">
+
+                {% if placed == 1 %}
+                    <div class="mb-3">
+                        <div class="brand-icon-box mx-auto" style="width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bi bi-patch-check-fill text-white fs-2"></i>
+                        </div>
+                    </div>
+                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1 mb-2 fw-bold text-uppercase" style="letter-spacing: 0.08em; font-size: 0.75rem;">
+                        High Recruitment Probability
+                    </span>
+                    <h2 class="fw-bold text-dark mb-2">Congratulations! High Placement Likelihood (Placed)</h2>
+                    <p class="text-muted mx-auto mb-4" style="max-width: 580px;">
+                        Based on your academic performance, coding assessment scores, and practical internships, our dual machine learning models forecast a successful campus recruitment outcome.
+                    </p>
+
+                    <!-- Estimated Salary Package Block -->
+                    <div class="card-novara bg-white border p-4 mb-4 mx-auto" style="max-width: 440px;">
+                        <span class="section-eyebrow mb-1">PROJECTED STARTING CTC</span>
+                        <div class="salary-tag-lpa">{{ salary_lpa }} <span class="fs-4 text-muted fw-bold">LPA</span></div>
+                        <div class="small text-muted">Estimated Annual Cost-To-Company (Lakhs Per Annum)</div>
+                    </div>
+                {% else %}
+                    <div class="mb-3">
+                        <div class="brand-icon-box mx-auto" style="width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="bi bi-exclamation-triangle-fill text-white fs-2"></i>
+                        </div>
+                    </div>
+                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 mb-2 fw-bold text-uppercase" style="letter-spacing: 0.08em; font-size: 0.75rem;">
+                        Recruitment Criteria At Risk
+                    </span>
+                    <h2 class="fw-bold text-dark mb-2">Placement Cutoff Gap Detected</h2>
+                    <p class="text-muted mx-auto mb-4" style="max-width: 580px;">
+                        Current profile parameters fall below average corporate selection thresholds. Follow the personalized improvement recommendations below to boost your likelihood before final rounds.
+                    </p>
+
+                    <div class="card-novara bg-white border p-4 mb-4 mx-auto" style="max-width: 440px;">
+                        <span class="section-eyebrow mb-1">PROJECTED STARTING CTC</span>
+                        <div class="fs-3 fw-bold text-muted my-2">Package Locked</div>
+                        <div class="small text-muted">Compensation forecasting unlocks once placement probability exceeds the 50% qualification boundary.</div>
+                    </div>
+                {% endif %}
+
+                <!-- Confidence Probability Progress Bar -->
+                <div class="mx-auto mt-2" style="max-width: 520px;">
+                    <div class="d-flex justify-content-between small fw-bold text-muted mb-2">
+                        <span>Algorithm Confidence Level:</span>
+                        <span class="{{ 'text-success' if placed == 1 else 'text-danger' }} fs-6">{{ probability }}%</span>
+                    </div>
+                    <div class="progress rounded-pill bg-secondary-subtle" style="height: 12px;">
+                        <div class="progress-bar {{ 'bg-success' if placed == 1 else 'bg-danger' }} progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: {{ probability }}%;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Rule-Based Actionable Tips Card -->
+        <div class="card-novara mb-4">
+            <div class="card-novara-header">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="brand-icon-box" style="width: 32px; height: 32px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; box-shadow: none;">
+                        <i class="bi bi-lightbulb-fill"></i>
+                    </div>
+                    <h5 class="mb-0 fw-bold">Personalized Action Roadmap</h5>
+                </div>
+                <span class="badge rounded-pill bg-light text-muted border px-3 py-1 small">Explainable Rule Engine</span>
+            </div>
+            <div class="card-novara-body">
+                <p class="text-muted small mb-3">
+                    Targeted guidance derived from transparent feature cutoffs to strengthen your technical portfolio:
+                </p>
+                <div class="d-flex flex-column gap-2">
+                    {% for tip in tips %}
+                        <div class="p-3 rounded-3 bg-light d-flex align-items-start gap-3">
+                            <span class="brand-icon-box mt-1" style="width: 24px; height: 24px; font-size: 0.75rem; border-radius: 50%;">
+                                <i class="bi bi-arrow-right"></i>
+                            </span>
+                            <span class="text-dark fw-medium">{{ tip }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Inputs Recap Card -->
+        <div class="card-novara mb-4">
+            <div class="card-novara-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-card-checklist text-primary fs-5"></i>
+                    <h6 class="mb-0 fw-bold">Evaluated Input Parameters</h6>
+                </div>
+            </div>
+            <div class="card-novara-body p-3">
+                <div class="row g-2 text-center">
+                    <div class="col-4 col-md-2 p-2 bg-light rounded-3">
+                        <div class="small text-muted">Branch</div>
+                        <div class="fw-bold text-dark mt-1">{{ inputs.branch }}</div>
+                    </div>
+                    <div class="col-4 col-md-2 p-2 bg-light rounded-3">
+                        <div class="small text-muted">CGPA</div>
+                        <div class="fw-bold text-dark mt-1">{{ inputs.cgpa }}</div>
+                    </div>
+                    <div class="col-4 col-md-2 p-2 bg-light rounded-3">
+                        <div class="small text-muted">Coding</div>
+                        <div class="fw-bold text-dark mt-1">{{ inputs.coding_score }}/100</div>
+                    </div>
+                    <div class="col-4 col-md-2 p-2 bg-light rounded-3">
+                        <div class="small text-muted">Comm.</div>
+                        <div class="fw-bold text-dark mt-1">{{ inputs.communication_score }}/100</div>
+                    </div>
+                    <div class="col-4 col-md-2 p-2 bg-light rounded-3">
+                        <div class="small text-muted">Internships</div>
+                        <div class="fw-bold text-dark mt-1">{{ inputs.internships }}</div>
+                    </div>
+                    <div class="col-4 col-md-2 p-2 bg-light rounded-3">
+                        <div class="small text-muted">Backlogs</div>
+                        <div class="fw-bold {{ 'text-danger' if inputs.backlogs > 0 else 'text-success' }} mt-1">{{ inputs.backlogs }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Navigation Buttons -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
+            <a href="{{ url_for('predict.predict_page') }}" class="btn-pill-outline-dark">
+                <i class="bi bi-arrow-repeat"></i>
+                <span>Test Another Profile</span>
+            </a>
+            <a href="{{ url_for('student_dashboard') }}" class="btn-pill-primary">
+                <i class="bi bi-grid-fill"></i>
+                <span>Return to Dashboard</span>
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

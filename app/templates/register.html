@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card-novara">
+            <div class="card-novara-header-dark text-center py-4">
+                <div class="brand-icon-box mx-auto mb-2">
+                    <i class="bi bi-person-plus-fill fs-5"></i>
+                </div>
+                <h4 class="mb-1 fw-bold">Student Registration</h4>
+                <p class="text-white-50 small mb-0">Join the PlacementAI prediction & readiness platform</p>
+            </div>
+            <div class="card-novara-body p-4">
+                <div class="alert alert-info py-2 small mb-4 rounded-3 border-0 bg-primary-subtle text-primary">
+                    <i class="bi bi-info-circle me-1"></i>
+                    All accounts created here are assigned the <strong>Student</strong> role.
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+                    <!-- CSRF Protection Token -->
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- Full Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" id="name" name="name"
+                                   placeholder="e.g. John Doe" value="{{ name|default('') }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label">College Email Address <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   placeholder="e.g. student@college.edu" value="{{ email|default('') }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="password" class="form-label mb-0">Password <span class="text-danger">*</span></label>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-muted small" id="togglePasswordBtn">
+                                <i class="bi bi-eye"></i> Show
+                            </button>
+                        </div>
+                        <div class="input-group mt-1">
+                            <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Create a strong password" required>
+                        </div>
+
+                        <!-- Live Strength Bar -->
+                        <div class="strength-bar-container">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="mt-1" id="strengthText">
+                            <small class="text-muted">Strength: Enter a password</small>
+                        </div>
+                    </div>
+
+                    <!-- Live Rule Checklist -->
+                    <div class="card bg-light border-0 p-3 mb-3 mt-2 rounded-3">
+                        <span class="fw-bold small text-secondary mb-2">Password Policy Requirements:</span>
+                        <div class="password-rule-item" id="rule-length">
+                            <i class="bi bi-circle"></i> Minimum 8 characters
+                        </div>
+                        <div class="password-rule-item" id="rule-upper">
+                            <i class="bi bi-circle"></i> At least 1 uppercase letter (A-Z)
+                        </div>
+                        <div class="password-rule-item" id="rule-lower">
+                            <i class="bi bi-circle"></i> At least 1 lowercase letter (a-z)
+                        </div>
+                        <div class="password-rule-item" id="rule-number">
+                            <i class="bi bi-circle"></i> At least 1 number (0-9)
+                        </div>
+                        <div class="password-rule-item" id="rule-special">
+                            <i class="bi bi-circle"></i> At least 1 special character (!@#$%^&*)
+                        </div>
+                        <div class="password-rule-item" id="rule-name-email">
+                            <i class="bi bi-circle"></i> Must not contain your name or email
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-check2-circle"></i></span>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                                   placeholder="Re-enter password" required>
+                        </div>
+                        <div id="matchStatus" class="small mt-1"></div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn-pill-primary justify-content-center py-2 shadow">
+                            <i class="bi bi-person-check-fill me-1"></i>
+                            <span>Create Student Account</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3 border-top">
+                <span class="text-muted small">Already registered?</span>
+                <a href="{{ url_for('auth.login') }}" class="fw-bold ms-1 text-primary">Sign in here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/password_strength.js') }}"></script>
+{% endblock %}
